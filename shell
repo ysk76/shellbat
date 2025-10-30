@@ -1,0 +1,23 @@
+実行日（年月日）付きの結果ファイル
+#!/bin/ksh
+
+ReadData="/ファイルパス"
+# 日付を付けて出力ファイル名作成（例：/tmp/result_20251023.txt）
+ResultData="/tmp/result_$(date '+%Y%m%d').txt"
+
+# 親ディレクトリを作成（存在しない場合に備えて）
+mkdir -p "$(dirname "$ResultData")"
+
+echo "=== JP1/AJS カレンダー取得開始 ($(date '+%Y-%m-%d %H:%M:%S')) ===" > "$ResultData"
+
+if [ -e "$ReadData" ]; then
+    while read line
+    do
+        [ -z "$line" ] && continue
+        echo "$line : $(ajsprint -F AJSROOT1 -c "$line" | tr -d '\n')" >> "$ResultData"
+    done < "$ReadData"
+else
+    echo "\"$ReadData\" が存在しません" >> "$ResultData"
+fi
+
+echo "=== 完了 ($(date '+%Y-%m-%d %H:%M:%S')) ===" >> "$ResultData"
