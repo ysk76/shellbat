@@ -1,0 +1,23 @@
+#!/bin/ksh
+
+ReadData="/ファイルパス"
+ResultData="/結果ファイルパス"
+
+# 出力開始
+echo "=== JP1/AJS カレンダー取得開始 ===" > "$ResultData"
+
+# ReadDataの存在確認
+if [ -e "$ReadData" ]; then
+    while read line
+    do
+        # 空行スキップ
+        [ -z "$line" ] && continue
+
+        # $line と ajsprint結果を1行で出力
+        echo "$line : $(ajsprint -F AJSROOT1 -c "$line")" >> "$ResultData"
+    done < "$ReadData"
+else
+    echo "\"$ReadData\" が存在しません" >> "$ResultData"
+fi
+
+echo "=== 完了 ===" >> "$ResultData"
