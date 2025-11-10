@@ -1,6 +1,9 @@
 実行日（年月日）付きの結果ファイル
 #!/bin/ksh
 
+# 翌月の年月（例：202510 → 202511）
+next_month=$(date -d "$(date +%Y-%m-15) +1 month" +%Y%m)
+
 ReadData="/ファイルパス"
 # 日付を付けて出力ファイル名作成（例：/tmp/result_20251023.txt）
 ResultData="/tmp/result_$(date '+%Y%m%d').txt"
