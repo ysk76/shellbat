@@ -1,0 +1,65 @@
+どんなエラーが起きても exit 0 にするポイント
+exit 1 を使わない
+
+set -e（エラー即終了）を使わない
+
+return も使わない
+
+最後に 必ず exit 0 を置く
+
+コマンド失敗時はログに書くだけでスクリプトは継続する
+
+
+#!/bin/ksh
+
+#### ▼ 設定 ▼ ####
+ReadData="/ファイルパス"
+
+# 現在年月
+YYYY=$(date +%Y)
+MM=$(date +%m)
+
+# 翌月計算
+if [ "$MM" -eq 12 ]; then
+    YYYY=$(expr $YYYY + 1)
+    MM=1
+else
+    MM=$(expr $MM + 1)
+fi
+MM=$(printf "%02d" $MM)
+
+# 結果ファイル名
+next_month="${YYYY}${MM}"
+ResultData="/tmp/result_${next_month}.txt"
+####################
+
+# 親ディレクトリ作成
+mkdir -p "$(dirname "$ResultData")"
+
+echo "=== JP1/AJS 翌月カレンダー取得開始 ($(date '+%Y-%m-%d %H:%M:%S')) ===" > "$ResultData"
+
+# 入力ファイルチェック（エラーでも exit しない）
+if [ ! -e "$ReadData" ]; then
+    echo "[ERROR] 入力ファイル \"$ReadData\" が存在しません。" >> "$ResultData"
+else
+    while read line
+    do
+        [ -z "$line" ] && continue
+
+        output=$(ajsprint -F AJSROOT1 -c "$line" 2>&1)
+        ret=$?
+
+        if [ $ret -eq 0 ]; then
+            echo "[OK] $line : $output" >> "$ResultData"
+        else
+            echo "[ERROR] ajsprint failed (group: $line, return: $ret)" >> "$ResultData"
+            echo "        詳細: $output" >> "$ResultData"
+        fi
+
+    done < "$ReadData"
+fi
+
+echo "=== 完了 ($(date '+%Y-%m-%d %H:%M:%S')) ===" >> "$ResultData"
+
+# ▼必ず正常終了させる
+exit 0
